@@ -1,12 +1,11 @@
 /src/vendor
 /src/node_modules
+/github
 /npm-debug.log
 /yarn-error.log
 
-/src/.env
-/src/.env.backup
-/src/.env.production
-/src/.env.*.local
+/src/.env.*
+/src/.editorconfig
 
 .DS_Store
 Thumbs.db
