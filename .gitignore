@@ -1,30 +1,30 @@
-/vendor
-/node_modules
+/src/vendor
+/src/node_modules
 /npm-debug.log
 /yarn-error.log
 
-.env
-.env.backup
-.env.production
-.env.*.local
+/src/.env
+/src/.env.backup
+/src/.env.production
+/src/.env.*.local
 
 .DS_Store
 Thumbs.db
 
-/storage/framework/cache/data/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-/storage/framework/cache/laravel-exceptions
-/storage/logs/*
-/storage/debugbar
-/storage/*.key
-/storage/pail
+/src/storage/framework/cache/data/*
+/src/storage/framework/sessions/*
+/src/storage/framework/views/*
+/src/storage/framework/cache/laravel-exceptions
+/src/storage/logs/*
+/src/storage/debugbar
+/src/storage/*.key
+/src/storage/pail
 
-/public/build
-/public/hot
-/public/storage
+/src/public/build
+/src/public/hot
+/src/public/storage
 
-/auth.json
+/src/auth.json
 _ide_helper.php
 Homestead.json
 Homestead.yaml
