@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use App\Models\RoundDefinition;
+use App\Models\Tournament;
 
 final class Game extends Model
 {
@@ -35,5 +36,10 @@ final class Game extends Model
     public function matchRounds(): HasManyThrough
     {
         return $this->hasManyThrough(MatchRound::class, GameMatch::class);
+    }
+
+    public function tournaments(): HasMany
+    {
+        return $this->hasMany(Tournament::class);
     }
 }

@@ -1,0 +1,25 @@
+@use 'variables' as *;
+
+// Tournaments
+.tournament-badge {
+    display: inline-block;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: $border-radius-sm;
+
+    &--pending {
+        background-color: rgba($color-accent, 0.15);
+        color: $color-accent;
+    }
+
+    &--active {
+        background-color: rgba(#22c55e, 0.15);
+        color: #22c55e;
+    }
+
+    &--closed {
+        background-color: rgba(#64748b, 0.15);
+        color: #94a3b8;
+    }
+}

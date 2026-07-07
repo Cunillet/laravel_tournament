@@ -7,6 +7,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameRoundDefinitionController;
 use App\Http\Controllers\GameScoringRuleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TournamentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -75,6 +76,47 @@ Route::middleware('auth')->group(function () {
         Route::delete('/games/{game}/scoring-rules/{scoringRule}', [GameScoringRuleController::class, 'destroy'])
             ->name('games.scoring-rules.destroy');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tournaments
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/tournaments', [TournamentController::class, 'index'])
+        ->name('tournaments.index');
+
+    Route::get('/tournaments/create', [TournamentController::class, 'create'])
+        ->name('tournaments.create')
+        ->middleware('manager');
+
+    Route::post('/tournaments', [TournamentController::class, 'store'])
+        ->name('tournaments.store')
+        ->middleware('manager');
+
+    Route::get('/tournaments/{tournament}', [TournamentController::class, 'show'])
+        ->name('tournaments.show');
+
+    Route::post('/tournaments/{tournament}/join', [TournamentController::class, 'join'])
+        ->name('tournaments.join');
+
+    Route::post('/tournaments/{tournament}/leave', [TournamentController::class, 'leave'])
+        ->name('tournaments.leave');
+
+    Route::post('/tournaments/{tournament}/start', [TournamentController::class, 'start'])
+        ->name('tournaments.start')
+        ->middleware('manager');
+
+    Route::post('/tournaments/{tournament}/rounds', [TournamentController::class, 'createRound'])
+        ->name('tournaments.rounds.store')
+        ->middleware('manager');
+
+    Route::post('/tournaments/rounds/{round}/close', [TournamentController::class, 'closeRound'])
+        ->name('tournaments.rounds.close')
+        ->middleware('manager');
+
+    Route::post('/tournaments/{tournament}/close', [TournamentController::class, 'close'])
+        ->name('tournaments.close')
+        ->middleware('manager');
 });
 
 /*

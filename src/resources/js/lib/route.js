@@ -24,6 +24,16 @@ const routes = {
     'games.scoring-rules.store': '/games/{game}/scoring-rules',
     'games.scoring-rules.update': '/games/{game}/scoring-rules/{scoringRule}',
     'games.scoring-rules.destroy': '/games/{game}/scoring-rules/{scoringRule}',
+    'tournaments.index': '/tournaments',
+    'tournaments.create': '/tournaments/create',
+    'tournaments.store': '/tournaments',
+    'tournaments.show': '/tournaments/{tournament}',
+    'tournaments.join': '/tournaments/{tournament}/join',
+    'tournaments.leave': '/tournaments/{tournament}/leave',
+    'tournaments.start': '/tournaments/{tournament}/start',
+    'tournaments.rounds.store': '/tournaments/{tournament}/rounds',
+    'tournaments.rounds.close': '/tournaments/rounds/{round}/close',
+    'tournaments.close': '/tournaments/{tournament}/close',
 };
 
 /**

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Tournament;
+use App\Models\TournamentPlayer;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -54,5 +56,21 @@ class User extends Authenticatable
     public function matchPlayers(): HasMany
     {
         return $this->hasMany(MatchPlayer::class);
+    }
+
+    /**
+     * @return HasMany<TournamentPlayer>
+     */
+    public function tournamentEntries(): HasMany
+    {
+        return $this->hasMany(TournamentPlayer::class);
+    }
+
+    /**
+     * @return HasMany<Tournament>
+     */
+    public function managedTournaments(): HasMany
+    {
+        return $this->hasMany(Tournament::class, 'created_by');
     }
 }

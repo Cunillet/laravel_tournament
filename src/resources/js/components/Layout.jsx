@@ -18,6 +18,12 @@ export default function Layout({ children, auth }) {
                     <nav className="header__nav">
                         {auth.user ? (
                             <div className="header__nav-items">
+                                        <Link
+                                            href={route('tournaments.index')}
+                                            className="header__nav-link"
+                                        >
+                                            Torneos
+                                        </Link>
                                         {auth.user.role === 0 && (
                                             <Link
                                                 href={route('games.index')}
