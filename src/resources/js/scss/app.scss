@@ -31,7 +31,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: $spacing-2xl $spacing-xl;
+    padding: $spacing-xl $spacing-md;
 
     &__container {
         text-align: center;
@@ -44,7 +44,7 @@ body {
     }
 
     &__title {
-        font-size: $font-size-4xl;
+        font-size: $font-size-3xl;
         font-weight: 800;
         background: linear-gradient(135deg, $color-accent, #fbbf24);
         -webkit-background-clip: text;
@@ -55,7 +55,7 @@ body {
     }
 
     &__subtitle {
-        font-size: $font-size-lg;
+        font-size: $font-size-base;
         color: $color-text-secondary;
         max-width: 600px;
         margin: 0 auto $spacing-2xl;
@@ -109,38 +109,17 @@ body {
     }
 }
 
-// Responsive
-@media (max-width: 768px) {
+// Desktop
+@media (min-width: 769px) {
     .hero {
-        padding: $spacing-xl $spacing-md;
+        padding: $spacing-2xl $spacing-xl;
 
         &__title {
-            font-size: $font-size-3xl;
+            font-size: $font-size-4xl;
         }
 
         &__subtitle {
-            font-size: $font-size-base;
+            font-size: $font-size-lg;
         }
-    }
-
-    .header {
-        padding: 0 $spacing-md;
-
-        &__logo-text {
-            display: none;
-        }
-
-        &__nav-link {
-            font-size: $font-size-xs;
-            padding: $spacing-xs $spacing-sm;
-        }
-    }
-
-    .auth-card {
-        padding: $spacing-xl;
-    }
-
-    .profile-card {
-        padding: $spacing-xl;
     }
 }

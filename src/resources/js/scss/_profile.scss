@@ -5,14 +5,14 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: $spacing-2xl $spacing-xl;
+    padding: $spacing-xl $spacing-md;
 }
 
 .profile-card {
     background-color: $color-bg-secondary;
     border: 1px solid $color-border;
     border-radius: $border-radius-lg;
-    padding: $spacing-2xl;
+    padding: $spacing-xl;
     width: 100%;
     max-width: 520px;
     box-shadow: $shadow-lg;
@@ -128,5 +128,16 @@
         background-color: $color-success-bg;
         color: $color-success;
         border: 1px solid $color-success;
+    }
+}
+
+// Desktop
+@media (min-width: 769px) {
+    .profile-page {
+        padding: $spacing-2xl $spacing-xl;
+    }
+
+    .profile-card {
+        padding: $spacing-2xl;
     }
 }

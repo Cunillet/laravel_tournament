@@ -1,0 +1,68 @@
+name: Laravel CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql, bcmath, xml, gd, redis
+          coverage: xdebug
+
+      - uses: actions/checkout@v4
+
+      - name: Copy .env
+        working-directory: src
+        run: cp .env.example .env
+
+      - name: Install Dependencies
+        working-directory: src
+        run: composer install --no-interaction --no-progress
+
+      - name: Generate key
+        working-directory: src
+        run: php artisan key:generate
+
+      - name: Directory Permissions
+        working-directory: src
+        run: chmod -R 777 storage bootstrap/cache
+
+      - name: Run Migrations
+        working-directory: src
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.mysql.ports[3306] }}
+          DB_DATABASE: testing
+        run: php artisan migrate --force
+
+      - name: Execute tests
+        working-directory: src
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.mysql.ports[3306] }}
+          DB_DATABASE: testing
+        run: php artisan test

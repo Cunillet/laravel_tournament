@@ -12,7 +12,7 @@
     background-color: $color-bg-secondary;
     border: 1px solid $color-border;
     border-radius: $border-radius-lg;
-    padding: $spacing-2xl;
+    padding: $spacing-xl;
     width: 100%;
     max-width: 440px;
     box-shadow: $shadow-lg;
@@ -177,5 +177,12 @@
     &--full {
         width: 100%;
         padding: $spacing-md;
+    }
+}
+
+// Desktop
+@media (min-width: 769px) {
+    .auth-card {
+        padding: $spacing-2xl;
     }
 }
