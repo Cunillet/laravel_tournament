@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\RoundDefinition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,7 +35,7 @@ final class MatchRound extends Model
 
     public function round(): BelongsTo
     {
-        return $this->belongsTo(Round::class);
+        return $this->belongsTo(RoundDefinition::class, 'round_id');
     }
 
     public function scores(): HasMany

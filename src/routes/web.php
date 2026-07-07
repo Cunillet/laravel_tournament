@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\GameRoundDefinitionController;
+use App\Http\Controllers\GameScoringRuleController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,6 +48,33 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/profile/{user}/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.update-password');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Games CRUD (admin only)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('admin')->group(function () {
+        Route::resource('games', GameController::class);
+
+        Route::post('/games/{game}/round-definitions', [GameRoundDefinitionController::class, 'store'])
+            ->name('games.round-definitions.store');
+
+        Route::put('/games/{game}/round-definitions/{roundDefinition}', [GameRoundDefinitionController::class, 'update'])
+            ->name('games.round-definitions.update');
+
+        Route::delete('/games/{game}/round-definitions/{roundDefinition}', [GameRoundDefinitionController::class, 'destroy'])
+            ->name('games.round-definitions.destroy');
+
+        Route::post('/games/{game}/scoring-rules', [GameScoringRuleController::class, 'store'])
+            ->name('games.scoring-rules.store');
+
+        Route::put('/games/{game}/scoring-rules/{scoringRule}', [GameScoringRuleController::class, 'update'])
+            ->name('games.scoring-rules.update');
+
+        Route::delete('/games/{game}/scoring-rules/{scoringRule}', [GameScoringRuleController::class, 'destroy'])
+            ->name('games.scoring-rules.destroy');
+    });
 });
 
 /*

@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use App\Models\RoundDefinition;
 
 final class Game extends Model
 {
@@ -18,7 +19,7 @@ final class Game extends Model
 
     public function rounds(): HasMany
     {
-        return $this->hasMany(Round::class)->orderBy('order');
+        return $this->hasMany(RoundDefinition::class)->orderBy('order');
     }
 
     public function scoringRules(): HasMany

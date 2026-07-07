@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
                     'id'        => $request->user()->id,
                     'nickname'  => $request->user()->nickname,
                     'email'     => $request->user()->email,
+                    'role'      => $request->user()->role,
                     'created_at' => $request->user()->created_at->format('d/m/Y H:i'),
                     'updated_at' => $request->user()->updated_at->format('d/m/Y H:i'),
                 ] : null,

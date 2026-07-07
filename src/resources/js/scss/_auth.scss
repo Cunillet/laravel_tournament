@@ -81,6 +81,19 @@
     padding: $spacing-sm $spacing-md;
     transition: border-color $transition-fast;
     outline: none;
+    width: 100%;
+
+    &--textarea {
+        resize: vertical;
+        min-height: 80px;
+        font-family: inherit;
+        line-height: 1.5;
+    }
+
+    &--select {
+        cursor: pointer;
+        appearance: auto;
+    }
 
     &:focus {
         border-color: $color-accent;

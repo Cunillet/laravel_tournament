@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\RoundDefinition;
 
 final class ScoringRule extends Model
 {
@@ -37,7 +38,7 @@ final class ScoringRule extends Model
 
     public function round(): BelongsTo
     {
-        return $this->belongsTo(Round::class);
+        return $this->belongsTo(RoundDefinition::class, 'round_id');
     }
 
     public function scoringSystem(): BelongsTo

@@ -25,6 +25,13 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        User::factory()->create([
+            'nickname' => 'Admin',
+            'email' => 'admin@admin.local',
+            'password' => bcrypt('123Admin'),
+            'role' => 0,
+        ]);
+
         $this->call(ScoringSystemSeeder::class);
     }
 }

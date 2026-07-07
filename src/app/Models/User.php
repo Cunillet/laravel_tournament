@@ -13,10 +13,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['nickname', 'email', 'password'])]
+#[Fillable(['nickname', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    public const int ROLE_ADMIN = 0;
+    public const int ROLE_MANAGER = 1;
+    public const int ROLE_USER = 2;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -30,7 +34,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'integer',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
     }
 
     /**

@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Redirect unauthenticated users to login
         $middleware->redirectGuestsTo(fn () => route('login'));
 
+        // Middleware aliases
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        ]);
+
         // Add Inertia middleware to web group
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
