@@ -8,6 +8,7 @@ use App\Models\GameMatch;
 use App\Models\MatchPlayer;
 use App\Models\MatchRound;
 use App\Models\MatchScore;
+use App\Services\ScoringRuleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,11 @@ use Inertia\Response;
 
 final class MatchController extends Controller
 {
+    /**
+     * List matches for the current user.
+     *
+     * Shows matches the user is a player in, plus any unassigned matches.
+     */
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -33,7 +39,10 @@ final class MatchController extends Controller
         ]);
     }
 
-    public function show(Request $request, GameMatch $match): Response
+    /**
+     * Display the match details page with scores and scoring rules.
+     */
+    public function show(Request $request, GameMatch $match, ScoringRuleService $scoringRuleService): Response
     {
         if (!$this->isPlayer($request, $match)) {
             abort(403, 'No eres jugador de esta partida.');
@@ -48,14 +57,8 @@ final class MatchController extends Controller
 
         // Attach scoring rules per match round: round-specific + global (null round_id)
         foreach ($match->rounds as $mr) {
-            $mr->round->scoringRules = \App\Models\ScoringRule::query()
-                ->where('game_id', $match->game_id)
-                ->where(function ($q) use ($mr) {
-                    $q->where('round_id', $mr->round_id)
-                        ->orWhereNull('round_id');
-                })
-                ->orderBy('priority')
-                ->get();
+            $mr->round->scoringRules = $scoringRuleService
+                ->getByGameAndRound($match->game_id, $mr->round_id);
         }
 
         // Find the match_player for the current user
@@ -69,7 +72,12 @@ final class MatchController extends Controller
         ]);
     }
 
-    public function updateScore(Request $request, MatchRound $round): JsonResponse|RedirectResponse
+    /**
+     * Update or create a score for a player in a match round.
+     *
+     * Validates that the player and scoring rule belong to the match before saving.
+     */
+    public function updateScore(Request $request, MatchRound $round, ScoringRuleService $scoringRuleService): JsonResponse|RedirectResponse
     {
         $match = $round->gameMatch;
 
@@ -92,14 +100,11 @@ final class MatchController extends Controller
         }
 
         // Ensure the scoring rule belongs to this round (round-specific or global)
-        $rule = \App\Models\ScoringRule::query()
-            ->where('game_id', $match->game_id)
-            ->where(function ($q) use ($round) {
-                $q->where('round_id', $round->round_id)
-                    ->orWhereNull('round_id');
-            })
-            ->where('id', $validated['scoring_rule_id'])
-            ->exists();
+        $rule = $scoringRuleService->existsForGameAndRound(
+            $match->game_id,
+            $round->round_id,
+            (int) $validated['scoring_rule_id'],
+        );
 
         if (!$rule) {
             throw ValidationException::withMessages([
@@ -121,6 +126,11 @@ final class MatchController extends Controller
         return back();
     }
 
+    /**
+     * Mark the current user as finished in a match.
+     *
+     * When all players have finished, the match status is set to 'completed'.
+     */
     public function playerFinish(Request $request, GameMatch $match): RedirectResponse
     {
         $player = $match->players()
@@ -145,6 +155,9 @@ final class MatchController extends Controller
         return back();
     }
 
+    /**
+     * Force-close a match regardless of player completion status.
+     */
     public function close(Request $request, GameMatch $match): RedirectResponse
     {
         if ($match->status !== 'pending') {
@@ -157,6 +170,12 @@ final class MatchController extends Controller
             ->with('success', 'Partida finalizada.');
     }
 
+    /**
+     * Determine whether the authenticated user has access to a match.
+     *
+     * Admins and managers always have access. Regular players must be
+     * a participant in the match.
+     */
     private function isPlayer(Request $request, GameMatch $match): bool
     {
         $user = $request->user();

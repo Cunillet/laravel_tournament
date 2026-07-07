@@ -7,8 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Tournament;
 use App\Models\TournamentPlayer;
 use App\Models\TournamentRound;
-use App\Models\TournamentMatch;
-use App\Models\ScoringRule;
+use App\Services\StandingsService;
 use App\Services\TournamentMatchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +16,9 @@ use Inertia\Response;
 
 final class TournamentController extends Controller
 {
+    /**
+     * List all tournaments.
+     */
     public function index(): Response
     {
         $tournaments = Tournament::query()
@@ -30,6 +32,9 @@ final class TournamentController extends Controller
         ]);
     }
 
+    /**
+     * Show the tournament creation form.
+     */
     public function create(): Response
     {
         $games = \App\Models\Game::all(['id', 'name']);
@@ -39,6 +44,9 @@ final class TournamentController extends Controller
         ]);
     }
 
+    /**
+     * Store a new tournament.
+     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -56,7 +64,10 @@ final class TournamentController extends Controller
             ->with('success', 'Torneo creado correctamente.');
     }
 
-    public function show(Tournament $tournament): Response
+    /**
+     * Display the tournament details page with standings.
+     */
+    public function show(Tournament $tournament, StandingsService $standingsService): Response
     {
         $tournament->load([
             'game:id,name',
@@ -67,96 +78,17 @@ final class TournamentController extends Controller
 
         $tournament->loadCount('players');
 
-        // Compute standings: accumulated scores per player per scoring rule
-        $standings = $this->computeStandings($tournament);
+        $standings = $standingsService->buildStandings($tournament);
+
         return Inertia::render('Tournaments/Show', [
             'tournament' => $tournament,
             'standings' => $standings,
         ]);
     }
 
-    private function computeStandings(Tournament $tournament): ?array
-    {
-        $matches = TournamentMatch::query()
-            ->whereHas('tournamentRound', fn($q) => $q->where('tournament_id', $tournament->id))
-            ->with([
-                'gameMatch' => function ($q) {
-                    $q->where('status', 'completed')->with([
-                        'players.user:id,nickname',
-                        'players.scores',
-                        'rounds',
-                        'rounds.scores',
-                        'rounds.round',
-                    ]);
-                },
-            ])
-            ->get()
-            ->pluck('gameMatch')
-            ->filter();
-
-        if ($matches->isEmpty()) return null;
-
-        // Collect scoring rules per match round (same logic as MatchController)
-        $rulesMap = [];
-        foreach ($matches as $gm) {
-            foreach ($gm->rounds as $mr) {
-                if (!$mr->round) continue;
-                $scoringRules = ScoringRule::query()
-                    ->where('game_id', $gm->game_id)
-                    ->where(function ($q) use ($mr) {
-                        $q->where('round_id', $mr->round_id)
-                            ->orWhereNull('round_id');
-                    })
-                    ->orderBy('priority')
-                    ->get();
-
-                foreach ($scoringRules as $rule) {
-                    $rulesMap[$rule->id] = [
-                        'id' => $rule->id,
-                        'name' => $rule->name,
-                        'priority' => $rule->priority ?? 0,
-                    ];
-                }
-            }
-        }
-        if (empty($rulesMap)) return null;
-        $sortedRules = collect($rulesMap)->sortBy('priority')->values()->toArray();
-
-        // Accumulate scores per player per rule
-        $playersMap = [];
-        foreach ($matches as $gm) {
-            foreach ($gm->rounds as $mr) {
-                foreach ($mr->scores as $sc) {
-                    $mp = $gm->players->firstWhere('id', $sc->match_player_id);
-                    if (!$mp || !$mp->user) continue;
-
-                    $userId = $mp->user_id;
-                    if (!isset($playersMap[$userId])) {
-                        $playersMap[$userId] = [
-                            'user' => ['id' => $mp->user->id, 'nickname' => $mp->user->nickname],
-                            'scores' => collect($sortedRules)->mapWithKeys(fn($r) => [$r['id'] => 0])->toArray(),
-                        ];
-                    }
-                    $playersMap[$userId]['scores'][$sc->scoring_rule_id] =
-                        ($playersMap[$userId]['scores'][$sc->scoring_rule_id] ?? 0) + (float) $sc->score;
-                }
-            }
-        }
-        if (empty($playersMap)) return null;
-
-        // Sort players lexicographically by rule priority
-        $players = collect($playersMap)->sort(function ($a, $b) use ($sortedRules) {
-            foreach ($sortedRules as $rule) {
-                $scoreA = $a['scores'][$rule['id']] ?? 0;
-                $scoreB = $b['scores'][$rule['id']] ?? 0;
-                if ($scoreA !== $scoreB) return $scoreB <=> $scoreA;
-            }
-            return 0;
-        })->values()->toArray();
-
-        return ['rules' => $sortedRules, 'players' => $players];
-    }
-
+    /**
+     * Join the tournament as the authenticated user.
+     */
     public function join(Request $request, Tournament $tournament): RedirectResponse
     {
         if (!$tournament->isPending()) {
@@ -179,6 +111,9 @@ final class TournamentController extends Controller
         return back()->with('success', 'Te has unido al torneo.');
     }
 
+    /**
+     * Leave the tournament as the authenticated user.
+     */
     public function leave(Request $request, Tournament $tournament): RedirectResponse
     {
         if (!$tournament->isPending()) {
@@ -192,6 +127,9 @@ final class TournamentController extends Controller
         return back()->with('success', 'Has salido del torneo.');
     }
 
+    /**
+     * Start the tournament, changing its status to 'active'.
+     */
     public function start(Tournament $tournament, TournamentMatchService $service): RedirectResponse
     {
         if (!$tournament->isPending()) {
@@ -207,6 +145,9 @@ final class TournamentController extends Controller
         return back()->with('success', 'Torneo iniciado.');
     }
 
+    /**
+     * Create a new round in the tournament with match pairings.
+     */
     public function createRound(Request $request, Tournament $tournament, TournamentMatchService $service): RedirectResponse
     {
         try {
@@ -219,6 +160,11 @@ final class TournamentController extends Controller
         }
     }
 
+    /**
+     * Close the current active round.
+     *
+     * If no more pairings are possible, the tournament is also closed.
+     */
     public function closeRound(Request $request, TournamentRound $round, TournamentMatchService $service): RedirectResponse
     {
         try {
@@ -236,6 +182,9 @@ final class TournamentController extends Controller
         }
     }
 
+    /**
+     * Force-close the tournament regardless of round status.
+     */
     public function close(Tournament $tournament, TournamentMatchService $service): RedirectResponse
     {
         $service->closeTournament($tournament);
