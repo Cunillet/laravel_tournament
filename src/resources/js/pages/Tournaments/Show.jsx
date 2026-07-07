@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import Layout from '../../components/Layout';
 
-export default function Show({ auth, tournament }) {
+export default function Show({ auth, tournament, standings }) {
     const user = auth.user;
     const isJoined = tournament.players?.some(p => p.user_id === user?.id);
     const canManage = user?.role === 0 || user?.role === 1;
@@ -105,6 +105,47 @@ export default function Show({ auth, tournament }) {
                         )}
                     </div>
 
+                    {/* Standings / accumulated results */}
+                    {tournament.rounds && tournament.rounds.length > 0 && (
+                        <div className="game-detail__section">
+                            <h2 className="game-detail__section-title">Clasificación general</h2>
+                            {standings ? (
+                                <div className="standings">
+                                    <table className="standings__table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Jugador</th>
+                                                {standings.rules.map(rule => (
+                                                    <th key={rule.id}>{rule.name}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {standings.players.map((p, index) => (
+                                                <tr key={p.user.id} className={index < 3 ? `standings__row--top${index + 1}` : ''}>
+                                                    <td className="standings__pos">
+                                                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                                                    </td>
+                                                    <td className="standings__player">{p.user.nickname}</td>
+                                                    {standings.rules.map(rule => (
+                                                        <td key={rule.id} className="standings__value">
+                                                            {p.scores[rule.id] ?? '—'}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className="game-detail__empty">
+                                    No hay resultados disponibles. Las partidas deben estar finalizadas para mostrar la clasificación.
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Rounds */}
                     <div className="game-detail__section">
                         <h2 className="game-detail__section-title">
@@ -129,16 +170,21 @@ export default function Show({ auth, tournament }) {
                                         {round.matches?.length > 0 && (
                                             <div className="rounds-list" style={{ gap: '0.5rem' }}>
                                                 {round.matches.map(tm => (
-                                                    <div key={tm.id} className="round-card" style={{ padding: '0.75rem' }}>
+                                                    <a
+                                                        key={tm.id}
+                                                        href={route('matches.show', tm.game_match_id)}
+                                                        className="round-card"
+                                                        style={{ padding: '0.75rem', textDecoration: 'none', cursor: 'pointer' }}
+                                                    >
                                                         <div className="round-card__content">
                                                             <p className="round-card__name" style={{ fontSize: '0.95rem' }}>
                                                                 {tm.game_match?.players?.map(p => p.user?.nickname).join(' vs ') || 'Partida'}
                                                             </p>
                                                             <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                                                Estado: {tm.game_match?.status}
+                                                                Estado: {tm.game_match?.status === 'pending' ? 'En juego' : 'Finalizada'}
                                                             </span>
                                                         </div>
-                                                    </div>
+                                                    </a>
                                                 ))}
                                             </div>
                                         )}

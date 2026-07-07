@@ -34,6 +34,11 @@ const routes = {
     'tournaments.rounds.store': '/tournaments/{tournament}/rounds',
     'tournaments.rounds.close': '/tournaments/rounds/{round}/close',
     'tournaments.close': '/tournaments/{tournament}/close',
+    'matches.index': '/matches',
+    'matches.show': '/matches/{match}',
+    'matches.rounds.scores.upsert': '/matches/rounds/{round}/scores',
+    'matches.player-finish': '/matches/{match}/finish',
+    'matches.close': '/matches/{match}/close',
 };
 
 /**

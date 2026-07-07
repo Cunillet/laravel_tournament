@@ -40,11 +40,18 @@ export default function Welcome({ auth }) {
 
                         <div className="hero__features">
                             <div className="feature-card">
-                                <div className="feature-card__icon">🏆</div>
-                                <h3 className="feature-card__title">Crea Torneos</h3>
-                                <p className="feature-card__text">
-                                    Organiza torneos personalizados con las reglas que tú elijas.
-                                </p>
+                                <Link
+                                    href={route('tournaments.index')}
+                                    className="text-decoration-none"
+                                >
+                                    <div className="feature-card__icon">🏆</div>
+                                        <h3 className="feature-card__title">
+                                            Crea Torneos
+                                        </h3>
+                                    <p className="feature-card__text">
+                                        Organiza torneos personalizados con las reglas que tú elijas.
+                                    </p>
+                                </Link>
                             </div>
                             <div className="feature-card">
                                 <div className="feature-card__icon">👥</div>

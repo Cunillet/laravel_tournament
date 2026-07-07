@@ -13,6 +13,11 @@ final class MatchPlayer extends Model
     protected $fillable = [
         'game_match_id',
         'user_id',
+        'finished_at',
+    ];
+
+    protected $casts = [
+        'finished_at' => 'datetime',
     ];
 
     public function gameMatch(): BelongsTo

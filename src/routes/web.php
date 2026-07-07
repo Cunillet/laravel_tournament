@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameRoundDefinitionController;
 use App\Http\Controllers\GameScoringRuleController;
+use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TournamentController;
 use Illuminate\Support\Facades\Route;
@@ -117,6 +118,26 @@ Route::middleware('auth')->group(function () {
     Route::post('/tournaments/{tournament}/close', [TournamentController::class, 'close'])
         ->name('tournaments.close')
         ->middleware('manager');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Matches
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/matches', [MatchController::class, 'index'])
+        ->name('matches.index');
+
+    Route::get('/matches/{match}', [MatchController::class, 'show'])
+        ->name('matches.show');
+
+    Route::post('/matches/rounds/{round}/scores', [MatchController::class, 'updateScore'])
+        ->name('matches.rounds.scores.upsert');
+
+    Route::post('/matches/{match}/finish', [MatchController::class, 'playerFinish'])
+        ->name('matches.player-finish');
+
+    Route::post('/matches/{match}/close', [MatchController::class, 'close'])
+        ->name('matches.close');
 });
 
 /*

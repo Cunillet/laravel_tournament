@@ -24,6 +24,12 @@ export default function Layout({ children, auth }) {
                                         >
                                             Torneos
                                         </Link>
+                                        <Link
+                                            href={route('matches.index')}
+                                            className="header__nav-link"
+                                        >
+                                            Partidas
+                                        </Link>
                                         {auth.user.role === 0 && (
                                             <Link
                                                 href={route('games.index')}

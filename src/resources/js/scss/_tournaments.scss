@@ -23,3 +23,73 @@
         color: #94a3b8;
     }
 }
+
+// Standings table (tournament leaderboard)
+.standings {
+    overflow-x: auto;
+    margin-top: $spacing-sm;
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: $font-size-sm;
+
+        th, td {
+            padding: $spacing-sm $spacing-md;
+            text-align: left;
+            border-bottom: 1px solid $color-border;
+        }
+
+        th {
+            font-weight: 600;
+            color: $color-text-primary;
+            background: $color-bg-secondary;
+            white-space: nowrap;
+        }
+    }
+
+    &__pos {
+        text-align: center;
+        width: 2.5rem;
+        font-weight: 700;
+    }
+
+    &__player {
+        font-weight: 600;
+        color: $color-text-primary;
+    }
+
+    &__value {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        color: $color-text-primary;
+    }
+
+    &__value--total {
+        font-weight: 700;
+        color: $color-accent;
+    }
+
+    &__row--top1 {
+        background-color: rgba(#fbbf24, 0.08);
+    }
+
+    &__row--top2 {
+        background-color: rgba(#94a3b8, 0.06);
+    }
+
+    &__row--top3 {
+        background-color: rgba(#f97316, 0.06);
+    }
+}
+
+// Desktop adjustments
+@media (min-width: 769px) {
+    .standings {
+        &__table {
+            th, td {
+                padding: $spacing-md $spacing-lg;
+            }
+        }
+    }
+}

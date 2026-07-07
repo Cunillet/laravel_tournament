@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Models\Tournament;
 use App\Models\TournamentPlayer;
 use App\Models\TournamentRound;
+use App\Models\TournamentMatch;
+use App\Models\ScoringRule;
 use App\Services\TournamentMatchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,9 +67,94 @@ final class TournamentController extends Controller
 
         $tournament->loadCount('players');
 
+        // Compute standings: accumulated scores per player per scoring rule
+        $standings = $this->computeStandings($tournament);
         return Inertia::render('Tournaments/Show', [
             'tournament' => $tournament,
+            'standings' => $standings,
         ]);
+    }
+
+    private function computeStandings(Tournament $tournament): ?array
+    {
+        $matches = TournamentMatch::query()
+            ->whereHas('tournamentRound', fn($q) => $q->where('tournament_id', $tournament->id))
+            ->with([
+                'gameMatch' => function ($q) {
+                    $q->where('status', 'completed')->with([
+                        'players.user:id,nickname',
+                        'players.scores',
+                        'rounds',
+                        'rounds.scores',
+                        'rounds.round',
+                    ]);
+                },
+            ])
+            ->get()
+            ->pluck('gameMatch')
+            ->filter();
+
+        if ($matches->isEmpty()) return null;
+
+        // Collect scoring rules per match round (same logic as MatchController)
+        $rulesMap = [];
+        foreach ($matches as $gm) {
+            foreach ($gm->rounds as $mr) {
+                if (!$mr->round) continue;
+                $scoringRules = ScoringRule::query()
+                    ->where('game_id', $gm->game_id)
+                    ->where(function ($q) use ($mr) {
+                        $q->where('round_id', $mr->round_id)
+                            ->orWhereNull('round_id');
+                    })
+                    ->orderBy('priority')
+                    ->get();
+
+                foreach ($scoringRules as $rule) {
+                    $rulesMap[$rule->id] = [
+                        'id' => $rule->id,
+                        'name' => $rule->name,
+                        'priority' => $rule->priority ?? 0,
+                    ];
+                }
+            }
+        }
+        if (empty($rulesMap)) return null;
+        $sortedRules = collect($rulesMap)->sortBy('priority')->values()->toArray();
+
+        // Accumulate scores per player per rule
+        $playersMap = [];
+        foreach ($matches as $gm) {
+            foreach ($gm->rounds as $mr) {
+                foreach ($mr->scores as $sc) {
+                    $mp = $gm->players->firstWhere('id', $sc->match_player_id);
+                    if (!$mp || !$mp->user) continue;
+
+                    $userId = $mp->user_id;
+                    if (!isset($playersMap[$userId])) {
+                        $playersMap[$userId] = [
+                            'user' => ['id' => $mp->user->id, 'nickname' => $mp->user->nickname],
+                            'scores' => collect($sortedRules)->mapWithKeys(fn($r) => [$r['id'] => 0])->toArray(),
+                        ];
+                    }
+                    $playersMap[$userId]['scores'][$sc->scoring_rule_id] =
+                        ($playersMap[$userId]['scores'][$sc->scoring_rule_id] ?? 0) + (float) $sc->score;
+                }
+            }
+        }
+        if (empty($playersMap)) return null;
+
+        // Sort players lexicographically by rule priority
+        $players = collect($playersMap)->sort(function ($a, $b) use ($sortedRules) {
+            foreach ($sortedRules as $rule) {
+                $scoreA = $a['scores'][$rule['id']] ?? 0;
+                $scoreB = $b['scores'][$rule['id']] ?? 0;
+                if ($scoreA !== $scoreB) return $scoreB <=> $scoreA;
+            }
+            return 0;
+        })->values()->toArray();
+
+        return ['rules' => $sortedRules, 'players' => $players];
     }
 
     public function join(Request $request, Tournament $tournament): RedirectResponse

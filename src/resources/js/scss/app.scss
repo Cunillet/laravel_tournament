@@ -3,6 +3,7 @@
 @use 'auth';
 @use 'profile';
 @use 'tournaments';
+@use 'matches';
 
 // Reset básico
 *,
@@ -24,6 +25,10 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+.text-decoration-none {
+    text-decoration: none;
 }
 
 // Hero section (Welcome page)
@@ -107,6 +112,7 @@ body {
         color: $color-text-secondary;
         font-size: $font-size-sm;
         line-height: 1.6;
+        text-decoration: none;
     }
 }
 
