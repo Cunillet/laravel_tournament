@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -47,30 +48,14 @@ class ProfileController extends Controller
     /**
      * Update the user's profile.
      */
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(UpdateProfileRequest $request, User $user): RedirectResponse
     {
         // Only allow updating your own profile
         if (Auth::id() !== $user->id) {
             abort(403, __('You can only update your own profile.'));
         }
 
-        $validated = $request->validate([
-            'nickname' => [
-                'required',
-                'string',
-                'max:50',
-                'alpha_dash',
-                'unique:users,nickname,' . $user->id,
-            ],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                'unique:users,email,' . $user->id,
-            ],
-            'current_password' => ['required', 'string', 'current_password'],
-        ]);
+        $validated = $request->validated();
 
         try {
             $user->update([
@@ -93,24 +78,13 @@ class ProfileController extends Controller
     /**
      * Update the user's password.
      */
-    public function updatePassword(Request $request, User $user): RedirectResponse
+    public function updatePassword(UpdatePasswordRequest $request, User $user): RedirectResponse
     {
         if (Auth::id() !== $user->id) {
             abort(403, __('You can only update your own password.'));
         }
 
-        $validated = $request->validate([
-            'current_password' => ['required', 'string', 'current_password'],
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
-                'regex:/[0-9]/',
-            ],
-        ]);
+        $validated = $request->validated();
 
         try {
             $user->update([

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTournamentRequest;
 use App\Models\Tournament;
 use App\Models\TournamentPlayer;
 use App\Models\TournamentRound;
@@ -47,13 +48,9 @@ final class TournamentController extends Controller
     /**
      * Store a new tournament.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTournamentRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:5000'],
-            'game_id' => ['required', 'exists:games,id'],
-        ]);
+        $validated = $request->validated();
 
         Tournament::create([
             ...$validated,

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -39,12 +41,9 @@ class AuthController extends Controller
     /**
      * Handle a login request.
      */
-    public function login(Request $request): RedirectResponse
+    public function login(LoginRequest $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email'    => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string'],
-        ]);
+        $credentials = $request->validated();
 
         $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
 
@@ -94,21 +93,9 @@ class AuthController extends Controller
     /**
      * Handle a registration request.
      */
-    public function register(Request $request): RedirectResponse
+    public function register(RegisterRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'nickname' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,nickname'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                'regex:/[A-Z]/',       // al menos una mayúscula
-                'regex:/[a-z]/',       // al menos una minúscula
-                'regex:/[0-9]/',       // al menos un número
-            ],
-        ]);
+        $validated = $request->validated();
 
         try {
             $user = User::create([

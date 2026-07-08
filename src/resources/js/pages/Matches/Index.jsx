@@ -21,7 +21,9 @@ export default function Index({ auth, matches }) {
                                 <div key={match.id} className="game-card">
                                     <div className="game-card__body">
                                         <h2 className="game-card__title">
-                                            {match.game?.name || 'Partida #' + match.id}
+                                            {match.tournament_match
+                                                ? `${match.tournament_match.tournament_round.tournament.name} - Ronda ${match.tournament_match.tournament_round.round_number}`
+                                                : (match.game?.name || 'Partida #' + match.id)}
                                         </h2>
                                         <div className="game-card__meta">
                                             <span className={`tournament-badge tournament-badge--${match.status}`}>

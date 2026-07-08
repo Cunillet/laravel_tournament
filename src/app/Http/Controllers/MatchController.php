@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateMatchScoreRequest;
 use App\Models\GameMatch;
 use App\Models\MatchPlayer;
 use App\Models\MatchRound;
@@ -28,7 +29,10 @@ final class MatchController extends Controller
         $user = $request->user();
 
         $matches = GameMatch::query()
-            ->with('game:id,name')
+            ->with([
+                'game:id,name',
+                'tournamentMatch.tournamentRound.tournament:id,name',
+            ])
             ->whereHas('players', fn ($q) => $q->where('user_id', $user->id))
             ->orWhereDoesntHave('players')
             ->latest()
@@ -77,7 +81,7 @@ final class MatchController extends Controller
      *
      * Validates that the player and scoring rule belong to the match before saving.
      */
-    public function updateScore(Request $request, MatchRound $round, ScoringRuleService $scoringRuleService): JsonResponse|RedirectResponse
+    public function updateScore(UpdateMatchScoreRequest $request, MatchRound $round, ScoringRuleService $scoringRuleService): JsonResponse|RedirectResponse
     {
         $match = $round->gameMatch;
 
@@ -85,11 +89,7 @@ final class MatchController extends Controller
             return back()->with('error', 'La partida está cerrada.');
         }
 
-        $validated = $request->validate([
-            'match_player_id' => ['required', 'exists:match_players,id'],
-            'scoring_rule_id' => ['required', 'exists:scoring_rules,id'],
-            'score' => ['required', 'numeric'],
-        ]);
+        $validated = $request->validated();
 
         // Ensure the player belongs to this match
         $player = MatchPlayer::findOrFail($validated['match_player_id']);

@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class GameMatch extends Model
 {
@@ -30,5 +31,10 @@ final class GameMatch extends Model
     public function rounds(): HasMany
     {
         return $this->hasMany(MatchRound::class, 'game_match_id')->orderBy('order');
+    }
+
+    public function tournamentMatch(): HasOne
+    {
+        return $this->hasOne(TournamentMatch::class, 'game_match_id');
     }
 }
