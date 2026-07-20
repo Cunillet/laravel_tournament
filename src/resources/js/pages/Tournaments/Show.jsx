@@ -31,6 +31,14 @@ export default function Show({ auth, tournament, standings }) {
         if (confirm('¿Cerrar el torneo definitivamente?')) handleAction(route('tournaments.close', tournament.id));
     };
 
+    const handleDelete = () => {
+        if (confirm('¿Eliminar el torneo y todas sus partidas? Esta acción no se puede deshacer.')) {
+            handleAction(route('tournaments.destroy', tournament.id), 'delete');
+        }
+    };
+
+    const canDelete = user?.role === 0;
+
     return (
         <>
             <Head title={tournament.name} />
@@ -54,12 +62,14 @@ export default function Show({ auth, tournament, standings }) {
                         canCreateRound={canCreateRound}
                         hasActiveRound={hasActiveRound}
                         canClose={canClose}
+                        canDelete={canDelete}
                         onJoin={() => handleAction(route('tournaments.join', tournament.id))}
                         onLeave={() => handleAction(route('tournaments.leave', tournament.id))}
                         onStart={() => handleAction(route('tournaments.start', tournament.id))}
                         onCreateRound={() => handleAction(route('tournaments.rounds.store', tournament.id))}
                         onCloseRound={handleCloseRound}
                         onClose={handleClose}
+                        onDelete={handleDelete}
                     />
 
                     <PlayerList players={tournament.players} />

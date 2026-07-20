@@ -4,8 +4,8 @@
  * All event handlers are passed as callbacks — no router calls here.
  */
 export default function TournamentActions({
-    canJoin, canLeave, canStart, canCreateRound, hasActiveRound, canClose,
-    onJoin, onLeave, onStart, onCreateRound, onCloseRound, onClose,
+    canJoin, canLeave, canStart, canCreateRound, hasActiveRound, canClose, canDelete,
+    onJoin, onLeave, onStart, onCreateRound, onCloseRound, onClose, onDelete,
 }) {
     return (
         <div className="game-edit__section" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -37,6 +37,11 @@ export default function TournamentActions({
             {canClose && (
                 <button className="btn btn--secondary" style={{ color: '#ef4444' }} onClick={onClose}>
                     Cerrar torneo
+                </button>
+            )}
+            {canDelete && (
+                <button className="btn btn--secondary" style={{ color: '#ef4444', borderColor: '#ef4444' }} onClick={onDelete}>
+                    Eliminar torneo
                 </button>
             )}
         </div>

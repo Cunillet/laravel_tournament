@@ -119,6 +119,10 @@ Route::middleware('auth')->group(function () {
         ->name('tournaments.close')
         ->middleware('manager');
 
+    Route::delete('/tournaments/{tournament}', [TournamentController::class, 'destroy'])
+        ->name('tournaments.destroy')
+        ->middleware('admin');
+
     /*
     |--------------------------------------------------------------------------
     | Matches

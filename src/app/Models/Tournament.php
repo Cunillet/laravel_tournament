@@ -57,4 +57,15 @@ final class Tournament extends Model
     {
         return $this->status === 'closed';
     }
+
+    /**
+     * Delete the tournament and all related data via DB cascade.
+     *
+     * FK cascadeOnDelete handles: tournament_players, tournament_rounds,
+     * tournament_matches, and game_matches automatically.
+     */
+    public function purge(): void
+    {
+        $this->delete();
+    }
 }

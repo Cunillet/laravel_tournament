@@ -189,4 +189,17 @@ final class TournamentController extends Controller
         return redirect()->route('tournaments.show', $tournament)
             ->with('success', 'Torneo cerrado.');
     }
+
+    /**
+     * Delete the tournament and all associated data.
+     *
+     * Only accessible by admin users via the admin middleware.
+     */
+    public function destroy(Tournament $tournament): RedirectResponse
+    {
+        $tournament->purge();
+
+        return redirect()->route('tournaments.index')
+            ->with('success', 'Torneo eliminado correctamente.');
+    }
 }
